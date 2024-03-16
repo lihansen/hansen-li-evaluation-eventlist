@@ -1,10 +1,10 @@
 header{
-    margin-top: 10px;
+    margin-top: 20px;
     width: 70%;
     margin: 0 auto;
-    margin-right: 10;
+    /*margin-right: 10;*/
     margin-bottom: 10px;
-    border: 1px solid blue;
+    /*border: 1px solid blue;*/
 
     /*background-color: aqua;*/
 
@@ -15,12 +15,17 @@ header{
 }
 
 header button{
-    margin: 0 5px;
+    margin-top: 20px;
+    margin: 0 15px;
     padding: 10px 20px;
-    border: 1px solid #000;
+    /*border: 1px solid #000;*/
     background-color: #008cba;
     font-size: 16px;
     color: #f0f0f0;
     cursor: pointer;
+    border-radius: 5px;
+    border: none;
 
 }
+
+

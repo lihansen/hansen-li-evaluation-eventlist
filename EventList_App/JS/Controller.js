@@ -10,20 +10,26 @@ class EventsController {
         // this.init();
         this.addNewEventBtnListener();
         this.showAllEvents();
-
-        //
-        // this.addDeleteClickEvents();
-        // this.addEditClickEvents();
     }
 
     addNewEventBtnListener() {
         this.view.addNewEventBtn.addEventListener("click", (e) => {
-            console.log("add new event button clicked");
-
+        
             this.view.renderAddNewEventRow();
-            this.view.addNewEventBtn.disabled = true;
+            this.view.setNewButtonDisable();
+            
+            this.submitNewEventListener();
+            this.cancelNewEventBtnListener()
+        });
+    }
 
-            this.submitNewEventListener()
+    cancelNewEventBtnListener() {
+
+        const cancelBtn = this.view.getCancelBtn("placeholder");
+        console.log(cancelBtn);
+        cancelBtn.addEventListener("click", (e) => {
+            this.view.removeEventRow("placeholder");
+            this.view.setNewButtonAvaliable();
         });
     }
 
@@ -41,7 +47,7 @@ class EventsController {
         });
     }
 
-    remove
+    
 
     addEditClickListener(eventId) {
         // const eventItem = this.view.getEventRow(eventId);
@@ -94,13 +100,6 @@ class EventsController {
         const saveBtn = this.view.getSaveBtn(eventId);
         const PrevEvent = this.model.findEvent(eventId);
 
-        // const updatedEvent = {
-        //     eventName: this.view.getNameInputValues(eventId),
-        //     startDate: this.view.getStartTimeInputValues(eventId),
-        //     endDate: this.view.getEndTimeInputValues(eventId),
-        // };
-
-
         saveBtn.addEventListener("click", (e) => {
             const eventName = this.view.getNameInputValues(eventId);
             const startDate = this.view.getStartTimeInputValues(eventId);
@@ -111,7 +110,6 @@ class EventsController {
                 startDate === PrevEvent.startDate &&
                 endDate === PrevEvent.endDate) {
                 alert("No changes made to the event");
-                return;
             } else {
                 const updatedEvent = {
                     eventName: eventName,
@@ -131,40 +129,12 @@ class EventsController {
                     
                     alert("Event updated!");
                 });
-
-
+                
             }
-
-
         });
-
-
-        //     if (e.target.classList.contains("save-btn")) {
-        //         console.log("save clicked");
-        //         const btnId = e.target.id;
-        //         const eventId = btnId.substring(4);
-        //         console.log(btnId);
-        //         // console.log("edit event id:", eventId);
-        //         const eventName = this.view.getNameInputValues(eventId);
-        //         const startDate = this.view.getStartTimeInputValues(eventId);
-        //         const endDate = this.view.getEndTimeInputValues(eventId);
-        //         const updatedEvent = {
-        //             title: eventName,
-        //             startDate: new Date(startDate),
-        //             endDate: new Date(endDate),
-        //         };
-        //
-        //         console.log(updatedEvent);
-        //         // this.api.updateEvent(eventId, updatedEvent).then((updatedEvent) => {
-        //         //     this.model.updateEvent(eventId, updatedEvent);
-        //         //     this.view.recoverToNormalMode(eventId, updatedEvent);
-        //         //     alert("Event updated!");
-        //         // });
-        //     }
-        // });
+        
     }
-
-
+    
     submitNewEventListener() {
         // add event listener for the submit button, button id="add_btn"
         this.view.setSubmitForm();
@@ -188,16 +158,17 @@ class EventsController {
                 alert("Please provide valid event name, start date and end date for the event");
 
             } else {
-                // this.model.addEvent({eventName, startDate, endDate});
                 this.api.addEvent({eventName, startDate, endDate}).then((newEvent) => {
                     this.model.addEvent(newEvent);
-                    // this.view.renderAddNewEvent(newEvent);
-                    // this.view.eventNameInput.value = "";
-                    // this.view.startTimeInput.value = "";
-                    // this.view.endTimeInput.value = "";
-                    //refresh the event list
+
                     alert("add new event successfully");
-                    location.reload();
+
+                    this.view.renderEventRow(newEvent, "placeholder");
+                    this.view.setNewButtonAvaliable();
+
+                    // console.log(event);
+                    this.addEditClickListener(newEvent.id);
+                    this.addDeleteClickListener(newEvent.id);
                 });
 
 
@@ -244,22 +215,20 @@ class EventsController {
     // }
 
 
-    addCancelClickEvents(btnId) {
-
-
-        this.view.EvenetList.addEventListener("click", (e) => {
-            if (e.target.classList.contains("cancel-btn")) {
-                console.log("cancel clicked");
-                const btnId = e.target.id;
-                const eventId = btnId.substring(6);
-                console.log(btnId);
-                // console.log("edit event id:", eventId);
-                this.view.recoverToNormalMode(eventId, this.model.findEvent(eventId));
-            }
-        });
-
-
-    }
+    // addCancelClickEvents(btnId) {
+    //     this.view.EvenetList.addEventListener("click", (e) => {
+    //         if (e.target.classList.contains("cancel-btn")) {
+    //             console.log("cancel clicked");
+    //             const btnId = e.target.id;
+    //             const eventId = btnId.substring(6);
+    //             console.log(btnId);
+    //             // console.log("edit event id:", eventId);
+    //             this.view.recoverToNormalMode(eventId, this.model.findEvent(eventId));
+    //         }
+    //     });
+    //
+    //
+    // }
 
 
     // add delete event for all delete buttons, class="delete-btn"
