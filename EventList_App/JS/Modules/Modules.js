@@ -5,9 +5,24 @@ class EventsModules {
         this.baseUrl = BaseURL;
         this.#events = [];
     }
+
+    findEvent(id) {
+        return this.#events.find((event) => event.id === id);
+    }
     setEvents(events) {
         this.#events = events;
     }
+
+    updateEvent(id, updatedEvent) {
+        this.#events = this.#events.map((event) => {
+            if (event.id === id) {
+                return updatedEvent;
+            }
+            return event;
+        });
+    }
+
+
     getEvents() {
         return this.#events;
     }

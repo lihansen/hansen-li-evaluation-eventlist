@@ -2,79 +2,158 @@ class EventsView {
     constructor() {
         this.addNewEventBtn = document.getElementById('addNewEvent');
         this.EvenetList = document.getElementById('event_list');
-
-
     }
-    
-    setSubmitForm(){
+
+    getEventRow(eventId) {
+        return this.EvenetList.querySelector(`#${eventId}`);
+    }
+
+    getCancelBtn(eventId) {
+        return this.getEventRow(eventId).querySelector(".cancel-btn");
+    }
+
+    getSaveBtn(eventId) {
+        return this.getEventRow(eventId).querySelector(".save-btn");
+    }
+
+    getEditBtn(eventId) {
+        return this.getEventRow(eventId).querySelector(".edit-btn");
+    }
+
+    getDeleteBtn(eventId) {
+        return this.getEventRow(eventId).querySelector(".delete-btn");
+    }
+
+
+    getNameInputValues(eventId) {
+        const nameInput = this.getEventRow(eventId).querySelector(".name_input");
+        return nameInput.value;
+    }
+
+    getStartTimeInputValues(eventId) {
+        const startTimeInput = this.getEventRow(eventId).querySelector(".start_input");
+        return startTimeInput.value;
+    }
+
+    getEndTimeInputValues(eventId) {
+        const endTimeInput = this.getEventRow(eventId).querySelector(".end_input");
+        return endTimeInput.value;
+    }
+
+    removeEventRow(eventId) {
+        console.log("deleteItem");
+        // document.getElementById(eventId).remove();
+        this.getEventRow(eventId).remove();
+    }
+
+    renderAddNewEventRow() {
+        console.log("append to the event list");
+        this.EvenetList.appendChild(this.createEventItemElement());
+    }
+
+    renderEventRow(event) {
+        this.EvenetList.appendChild(this.createExistEventElement(event));
+    }
+
+    setSubmitForm() {
         this.submitBtn = document.getElementById('add_btn');
         this.eventNameInput = document.getElementById('event_name_input');
         this.startTimeInput = document.getElementById('start_time_input');
         this.endTimeInput = document.getElementById('end_time_input');
+    }
 
-    }   
+
+    recoverToNormalMode(eventId, eventObj) {
+
+        console.log("recoverToNormalMode");
+        const eventItem = this.getEventRow(eventId);
+        console.log(eventObj);
+        const eventNameDiv = eventItem.querySelector(".event");
+        const startDiv = eventItem.querySelector(".start");
+        const endDiv = eventItem.querySelector(".end");
+        //
+        const saveBtn = eventItem.querySelector(".save-btn");
+        const cancelBtn = eventItem.querySelector(".cancel-btn");
 
 
-    editEvent(){
-        console.log("editEvent");
+        eventNameDiv.innerHTML = eventObj.eventName;
+        startDiv.innerHTML = eventObj.startDate;
+        endDiv.innerHTML = eventObj.endDate;
+
+        // remove save button
+        saveBtn.remove();
+
+        // remove cancel button
+        cancelBtn.remove();
+
+        // create edit button
+        const editBtn = document.createElement("button");
+        editBtn.innerText = "Edit";
+        editBtn.setAttribute("class", "edit-btn");
+        editBtn.setAttribute("id", "update" + eventId);
+        eventItem.querySelector(".actions").appendChild(editBtn);
+
+        // create delete button
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete";
+        deleteBtn.setAttribute("class", "delete-btn");
+        deleteBtn.setAttribute("id", "delete" + eventId);
+        eventItem.querySelector(".actions").appendChild(deleteBtn);
 
     }
 
-    // change event item to Edit mode
-    changeToEditMode(btnId){
-        console.log("changeToEditMode");
-        const eventId = btnId.substring(6);
-        const eventItem = document.getElementById(eventId);        
 
-        
+    // change event item to Edit mode
+    changeToEditMode(eventId) {
+
+        console.log(eventId, "changeToEditMode");
+
+        const eventItem = document.getElementById(eventId);
+
         // change the child div with class="event" to input
         const eventNameDiv = eventItem.querySelector(".event");
         const eventName = eventNameDiv.innerText;
-        eventNameDiv.innerHTML = `<input type="text" id="event_name_input" value="${eventName}"/>`;
-        
+        eventNameDiv.innerHTML = `<input type="text" class="name_input" id="event_name_input${eventId}" value="${eventName}"/>`;
+
         // change the child div with class="start" to input
         const startDiv = eventItem.querySelector(".start");
         const startDate = startDiv.innerText;
-        startDiv.innerHTML = `<input id="start_time_input" type="date" value="${startDate}"/>`;
-        
+        startDiv.innerHTML = `<input class="start_input" id="start_time_input${eventId}" type="date" value="${startDate}"/>`;
+
         // change the child div with class="end" to input
         const endDiv = eventItem.querySelector(".end");
         const endDate = endDiv.innerText;
-        endDiv.innerHTML = `<input id="end_time_input" type="date" value="${endDate}"/>`;
+        endDiv.innerHTML = `<input class="end_input" id="end_time_input${eventId}" type="date" value="${endDate}"/>`;
+
+
         // change the edit button to save button
-        const editBtn = document.getElementById(btnId);
-        editBtn.innerText = "Save";
-        editBtn.setAttribute("id", "save" + eventId);
-        
-        // change the delete button to cancel button
-        const deleteBtn = document.getElementById("delete" + eventId);
-        deleteBtn.innerText = "Cancel";
-        deleteBtn.setAttribute("id", "cancel" + eventId);
-        
-    }
+        const editBtn = eventItem.querySelector(".edit-btn");
+        const deleteBtn = eventItem.querySelector(".delete-btn");
+        // remove editbutton
+        editBtn.remove();
+        deleteBtn.remove();
 
-    renderEvents(events) {
-        console.log("renderEvents");
-        events.forEach(event => {
-            this.EvenetList.appendChild(this.createExistEventElement(event));
-        });
-    }
+        // create save button   
+        const saveBtn = document.createElement("button");
+        saveBtn.innerText = "Save";
+        saveBtn.setAttribute("class", "save-btn");
+        saveBtn.setAttribute("id", "save" + eventId);
+        eventItem.querySelector(".actions").appendChild(saveBtn);
 
 
-    renderAddNewEvent(event) {
-        console.log("renderAddNewEvent");
-        this.EvenetList.appendChild(this.createEventItemElement());
+        // create cancel button
+        const cancelBtn = document.createElement("button");
+        cancelBtn.innerText = "Cancel";
+        cancelBtn.setAttribute("class", "cancel-btn");
+        cancelBtn.setAttribute("id", "cancel" + eventId);
+        eventItem.querySelector(".actions").appendChild(cancelBtn);
     }
 
-    removeEventElement(id) {
-        console.log("deleteItem");
-        document.getElementById(id).remove();
-    }
 
     createEventItemElement() {
         const eventElement = document.createElement("div");
         // eventElement.classList.add("event");
-        console.log("addItem");
+        console.log("createEventItemElement");
         eventElement.setAttribute("class", "event_item");
         eventElement.innerHTML = `
             <div class="event">

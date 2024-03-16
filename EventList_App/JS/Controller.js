@@ -1,39 +1,171 @@
 import APIs from "./Modules/APIs.js";
+
 class EventsController {
     constructor(view, model) {
         this.view = view;
         this.model = model;
         this.BASE_URL = "http://localhost:3000/events";
         this.api = new APIs(this.BASE_URL);
-        console.log(this.view);
+
         // this.init();
-        this.addEventItem();
+        this.addNewEventBtnListener();
         this.showAllEvents();
-        this.addDeleteClickEvents();
-        this.addEditClickEvents();
+
+        //
+        // this.addDeleteClickEvents();
+        // this.addEditClickEvents();
     }
 
-    addEventItem(event) {
+    addNewEventBtnListener() {
         this.view.addNewEventBtn.addEventListener("click", (e) => {
-            console.log("clicked");
-            // get events from API
+            console.log("add new event button clicked");
 
-            this.view.renderAddNewEvent(event);
+            this.view.renderAddNewEventRow();
             this.view.addNewEventBtn.disabled = true;
-            this.submitNewEvent()   
+
+            this.submitNewEventListener()
         });
     }
 
     showAllEvents() {
-        // const events = this.model.getEvents();
         this.api.getEvents().then((events) => {
+            // model
             this.model.setEvents(events);
-            this.view.renderEvents(events);
-            console.log("model events:", this.model.getEvents());
+            // view
+            for (const event of events) {
+                this.view.renderEventRow(event);
+                console.log(event);
+                this.addEditClickListener(event.id);
+                this.addDeleteClickListener(event.id);
+            }
         });
     }
 
-    submitNewEvent() {
+    remove
+
+    addEditClickListener(eventId) {
+        // const eventItem = this.view.getEventRow(eventId);
+        // const editBtn = eventItem.querySelector(".edit-btn");
+        const editBtn = this.view.getEditBtn(eventId);
+        editBtn.addEventListener("click", (e) => {
+            console.log("edit clicked");
+            // view
+            this.view.changeToEditMode(eventId);
+
+            // control, change button actions
+            this.addCancelClickListener(eventId);
+            this.addSaveClickListener(eventId);
+        });
+    }
+
+    addCancelClickListener(eventId) {
+        // const eventItem = this.view.getEventRow(eventId);
+        // const cancelBtn = eventItem.querySelector(".cancel-btn");
+        const cancelBtn = this.view.getCancelBtn(eventId);
+        cancelBtn.addEventListener("click", (e) => {
+            // view
+            this.view.recoverToNormalMode(eventId, this.model.findEvent(eventId));
+
+            // control, recover button actions
+            this.addEditClickListener(eventId);
+            this.addDeleteClickListener(eventId);
+        });
+
+
+    }
+
+    addDeleteClickListener(eventId) {
+        // const eventItem = this.view.getEventRow(eventId);
+        // const deleteBtn = eventItem.querySelector(".delete-btn");
+        const deleteBtn = this.view.getDeleteBtn(eventId);
+        deleteBtn.addEventListener("click", (e) => {
+            console.log("delete clicked");
+            this.api.deleteEvent(eventId).then(() => {
+                // model
+                this.model.deleteEvent(eventId);
+                alert("Event deleted!");
+                // view
+                this.view.removeEventRow(eventId);
+            });
+        });
+    }
+
+    addSaveClickListener(eventId) {
+        const saveBtn = this.view.getSaveBtn(eventId);
+        const PrevEvent = this.model.findEvent(eventId);
+
+        // const updatedEvent = {
+        //     eventName: this.view.getNameInputValues(eventId),
+        //     startDate: this.view.getStartTimeInputValues(eventId),
+        //     endDate: this.view.getEndTimeInputValues(eventId),
+        // };
+
+
+        saveBtn.addEventListener("click", (e) => {
+            const eventName = this.view.getNameInputValues(eventId);
+            const startDate = this.view.getStartTimeInputValues(eventId);
+            const endDate = this.view.getEndTimeInputValues(eventId);
+
+            // check any changes in the updatedEvent
+            if (eventName === PrevEvent.eventName &&
+                startDate === PrevEvent.startDate &&
+                endDate === PrevEvent.endDate) {
+                alert("No changes made to the event");
+                return;
+            } else {
+                const updatedEvent = {
+                    eventName: eventName,
+                    startDate: startDate,
+                    endDate: endDate,
+                }
+                this.api.updateEvent(eventId, updatedEvent).then((updatedEvent) => {
+                    // model
+                    this.model.updateEvent(eventId, updatedEvent);
+
+                    // view, recover to the normal mode
+                    this.view.recoverToNormalMode(eventId, updatedEvent);
+                    
+                    // controller, recover button actions
+                    this.addEditClickListener(eventId);
+                    this.addDeleteClickListener(eventId);
+                    
+                    alert("Event updated!");
+                });
+
+
+            }
+
+
+        });
+
+
+        //     if (e.target.classList.contains("save-btn")) {
+        //         console.log("save clicked");
+        //         const btnId = e.target.id;
+        //         const eventId = btnId.substring(4);
+        //         console.log(btnId);
+        //         // console.log("edit event id:", eventId);
+        //         const eventName = this.view.getNameInputValues(eventId);
+        //         const startDate = this.view.getStartTimeInputValues(eventId);
+        //         const endDate = this.view.getEndTimeInputValues(eventId);
+        //         const updatedEvent = {
+        //             title: eventName,
+        //             startDate: new Date(startDate),
+        //             endDate: new Date(endDate),
+        //         };
+        //
+        //         console.log(updatedEvent);
+        //         // this.api.updateEvent(eventId, updatedEvent).then((updatedEvent) => {
+        //         //     this.model.updateEvent(eventId, updatedEvent);
+        //         //     this.view.recoverToNormalMode(eventId, updatedEvent);
+        //         //     alert("Event updated!");
+        //         // });
+        //     }
+        // });
+    }
+
+
+    submitNewEventListener() {
         // add event listener for the submit button, button id="add_btn"
         this.view.setSubmitForm();
         // console.log(this.view.submitBtn);
@@ -48,14 +180,14 @@ class EventsController {
                 startDate: new Date(startDate),
                 endDate: new Date(endDate),
             };
-            
+
             // location.reload();
             //
             // // pop alert
             if (!newEvent.title || !newEvent.startDate || !newEvent.endDate) {
                 alert("Please provide valid event name, start date and end date for the event");
 
-            }else{
+            } else {
                 // this.model.addEvent({eventName, startDate, endDate});
                 this.api.addEvent({eventName, startDate, endDate}).then((newEvent) => {
                     this.model.addEvent(newEvent);
@@ -93,18 +225,40 @@ class EventsController {
 
         });
     }
-    // add edit event for all edit buttons, class="edit-btn"
-    addEditClickEvents() {
-        this.view.EvenetList.addEventListener("click", (e) => {
-            if (e.target.classList.contains("edit-btn")) {
-                console.log("edit clicked");
 
+
+    // // add edit event for all edit buttons, class="edit-btn"
+    // addEditClickEvents() {
+    //     this.view.EvenetList.addEventListener("click", (e) => {
+    //         if (e.target.classList.contains("edit-btn")) {
+    //             console.log("edit clicked");
+    //
+    //             const btnId = e.target.id;
+    //             console.log(btnId);
+    //             // console.log("edit event id:", eventId);
+    //             this.view.changeToEditMode(btnId);
+    //             this.addCancelClickEvents(btnId);
+    //             this.addSaveEditEvent();
+    //         }
+    //     });
+    // }
+
+
+    addCancelClickEvents(btnId) {
+
+
+        this.view.EvenetList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("cancel-btn")) {
+                console.log("cancel clicked");
                 const btnId = e.target.id;
+                const eventId = btnId.substring(6);
                 console.log(btnId);
                 // console.log("edit event id:", eventId);
-                this.view.changeToEditMode(btnId);
+                this.view.recoverToNormalMode(eventId, this.model.findEvent(eventId));
             }
         });
+
+
     }
 
 
